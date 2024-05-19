@@ -80,7 +80,7 @@ const createActivationToken = (seller) => {
 router.post(
     "/activation",
     catchAsyncErrors(async (req, res, next) => {
-        console.log("berhasil kesini")
+        //console.log("berhasil kesini")
 
       try {
         const { activation_token } = req.body;
@@ -168,7 +168,7 @@ router.post("/login-shop", catchAsyncErrors(async(req,res,next) => {
   // load shop
   router.get("/getSeller", isSeller, catchAsyncErrors( async(req,res, next) => {
     try{
-        console.log(req.seller)
+        //console.log(req.seller)
         const seller = await Shop.findById(req.seller._id);
         if(!seller){
             return next(new ErrorHandler("User doesnt exists", 400));
@@ -183,6 +183,25 @@ router.post("/login-shop", catchAsyncErrors(async(req,res,next) => {
        return next(new ErrorHandler(error.message, 500))
     }
   }))
+
+  //logout seller
+  router.get(
+    "/logout",
+    catchAsyncErrors(async (req, res, next) => {
+      try {
+        res.cookie("seller_token",null, {
+          expires: new Date(Date.now()),
+          httpOnly: true,
+        });
+        res.status(201).json({
+          success: true,
+          message: "Logout Berhasil",
+        });
+      } catch (error) {
+        return next(new ErrorHandler(error.message, 500));
+      }
+    })
+  );
 
 
 module.exports = router;
