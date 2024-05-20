@@ -38,7 +38,7 @@ router.get("/test", (req,res,next) => {
 })
 
 
-// get all product 
+// get all coupon 
 
 router.get("/get-coupon/:id",isSeller, catchAsyncErrors(async(req,res,next) => {
     try{
@@ -54,5 +54,24 @@ router.get("/get-coupon/:id",isSeller, catchAsyncErrors(async(req,res,next) => {
     }
 }))
 
+
+// delete coupon 
+router.delete("/delete-coupon/:id", isSeller, catchAsyncErrors(async (req,res,next) => {
+    try{
+        const cariCoupon = await CouponCode.findByIdAndDelete( req.params.id )
+
+        if (!cariCoupon){
+            return next(new ErrorHandler("Kupon yang ingin dihapus tidak ditemukan", 400))
+        }
+        res.status(201).json({
+            message : "Sukses untuk menghapus kupon",
+            cariCoupon
+        })
+
+    }
+    catch(error){
+        return next(new ErrorHandler(error,400))
+    }
+}))
 
 module.exports = router;
