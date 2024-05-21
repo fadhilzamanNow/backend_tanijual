@@ -94,4 +94,21 @@ router.delete("/delete-shop-product/:id", isSeller, catchAsyncErrors(async(req,r
      }
 }))
 
+
+// get all product dari semua shop yang ada di jual tani
+
+router.get("/get-all-products", catchAsyncErrors(async (req,res,next) => {
+    try{
+        const products = await Product.find();
+
+        res.status(201).json({
+            message : "success",
+            products
+        })
+    }
+    catch(error){
+        return next(new ErrorHandler(error,400))
+    }
+}))
+
 module.exports = router;

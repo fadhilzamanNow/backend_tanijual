@@ -99,4 +99,18 @@ router.delete("/delete-shop-event/:id", isSeller, catchAsyncErrors(async(req,res
     }
 }))
 
+// get semua event
+
+router.get("/get-all-events", async(req,res,next) => {
+    try{
+        const events = await Event.find()
+        res.status(201).json({
+            success : true,
+            events,
+        })
+    }catch(error){
+        return next(new ErrorHandler(error,400))
+    }
+})
+
 module.exports = router;
