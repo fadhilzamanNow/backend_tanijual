@@ -1,25 +1,46 @@
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const crypto = require("crypto");
 const userSchema = new mongoose.Schema({
   name: {
     type: String,
-    required: [true, "Please enter your name!"],
+    required: [true, "Mohon masukkan namamu!"],
   },
   email: {
     type: String,
-    required: [true, "Please enter your email address"],
+    required: [true, "Mohon masukkan emailmu"],
   },
   password: {
     type: String,
-    required: [true, "Please enter your password"],
-    minLength: [6, "Password should be greater than 6 characters"],
+    required: [true, "Mohon masukkan passwordmu"],
+    minLength: [6, "Passwordd yang dibuat minimal berisikan 6 karakter"],
     select: false,
   },
-  address: {
-    type: String,
+  phoneNumber : {
+    type : Number
   },
+  addresses: [
+    {
+      country : {
+        type : String 
+      },
+      city : {
+        type : String
+      },
+      address1 : {
+        type : String
+      },
+      address2 : {
+        type : String
+      },
+      zipCode : {
+        type : Number
+      },
+      addressType : {
+        type : String
+      },
+    }
+  ],
   role: {
     type: String,
     default: "user",

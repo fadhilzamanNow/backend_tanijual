@@ -172,4 +172,165 @@ router.get(
     })
   );
     
+//update informasi pengguna
+
+router.put("/update-user-info", isAuthenticated, catchAsyncErrors(async(req,res,next) => {
+  try{
+    const {email,password,phoneNumber,name} = req.body;
+    const user = await User.findOne({email}).select("+password");
+
+    if(!user){
+      return next(new ErrorHandler('User tidak ditemukan', 400))
+    }
+
+
+    const isPasswordValid = await user.comparePassword(password);
+    if(!isPasswordValid){
+      return next(new ErrorHandler("Tolong sediakan informasi yang benar", 400))
+    }
+
+    user.name = name
+    user.email = email
+    user.phoneNumber = phoneNumber;
+
+    await user.save();
+
+    res.status(201).json({
+      success : true,
+      user,
+    })
+  }
+  catch(error){
+    return next(new ErrorHandler(error.message,500))
+  }
+})
+)
+
+// update foto profil user
+router.put("/update-avatar", isAuthenticated, upload.single("image"), catchAsyncErrors(async(req,res,next) => {
+  try{
+    const existsUser = await User.findById(req.user.id);
+    console.log("exists user :", existsUser)
+    const existAvatarPath = `uploads/${existsUser.avatar}`
+    fs.unlinkSync(existAvatarPath);
+
+    const fileUrl = path.join(req.file.filename);
+
+    const user= await User.findByIdAndUpdate(req.user.id, {
+      avatar : fileUrl
+    })
+
+    res.status(200).json({
+      success : true,
+      user
+    })
+  }
+  catch(error){
+    return next(new ErrorHandler(error,400))
+  }
+}))
+
+
+//update user address
+router.put("/update/-user-addresses", isAuthenticated, catchAsyncErrors(async(req,res,next) => {
+  try{
+    const user = await User.findById(req.user.id);
+    const sameTypeAddress = user.addresses.find((address) => address.addressType ===  req.body.addressType)
+    if(sameTypeAddress){
+      return next(new ErrorHandler(`${req.body.addressType} sudah ada` ))
+    }
+    const existAddress = user.addresses.find(address => address._id === req.body._id)
+
+    if(existAddress){
+      Object.assign(existAddress, req.body)
+    }else{
+      user.addresses.push(req.body)
+    }
+
+    await user.save();
+
+    res.status(200).json({
+      success : true,
+      user
+    })
+
+  }
+  catch(error){
+    return next(new ErrorHandler(error,400))
+  }
+}))
+
+
+//delete user address 
+router.delete('/delete-user-address/:id', isAuthenticated, catchAsyncErrors(async(req,res,next) => {
+  try{
+    console.log("OK MASUK")
+    const userId = req.user.id
+
+    const addressId = req.params.id
+
+    await User.updateOne({
+      _id : userId
+    },{$pull : {addresses : {_id : addressId}}})
+
+    const user = await User.findById(userId)
+
+    res.status(201).json({
+      success : true,
+      user
+    })
+  }
+
+
+ 
+
+
+
+  
+
+  catch(error){
+    return next(new ErrorHandler(error,400))
+  }
+}))
+
+
+ //update password user
+ router.put('/update-password', isAuthenticated , async (req,res,next) => {
+  try{
+    const user = await User.findById(req.user.id).select("+password");
+
+    const isPasswordMatch = await user.comparePassword(req.body.oldPassword)
+
+
+    if(!isPasswordMatch){
+      res.status(404).json({
+        message : "Pasword lama yang kamu masukkan salah"
+      })
+      return next(new ErrorHandler("Password yang kamu masukkan salah"))
+    };
+
+    if(req.body.newPassword !== req.body.confirmPassword){
+      res.status(404).json({
+        message : "Konfirmasi passwordmu tidak sesuai"
+      })
+      return next(new ErrorHandler("Password baru yang kamu masukkan tidak sesuai dengan password yang kamu konfirmasikan"))
+    }
+
+    user.password = req.body.newPassword;
+
+    await user.save();
+
+    res.status(201).json({
+      success : true,
+      message : "Selamat, password telah berhasil untuk digantikan"
+    })
+  }catch(error){
+    return next(new ErrorHandler(error,400))
+  }
+ })
+
+
+
+
+
 module.exports = router;
