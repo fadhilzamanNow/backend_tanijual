@@ -4,25 +4,27 @@ const catchAsyncErrors = require("../middleware/catchAsyncErrors")
 const express = require("express");
 const { upload } = require("../multer");
 const router = express.Router();
+const path = require ("path");
+
 
 
 //buat percakapan baru
 
-router.post("/create-new-message",upload.array("images"),catchAsyncErrors(async(req,res,next) => {
+router.post("/create-new-message",upload.single("images"),catchAsyncErrors(async(req,res,next) => {
     try{
 
-        const messageData  =req.body
+        const messageData  = req.body
+        console.log("body : ", req.body)
         console.log(messageData);
-        if(req.files) {
-            const files = req.files;
-            const imageUrls = files.map((file) => `${file.fileName}`);
-
-            messageData.images = imageUrls;
-        }
+        if (req.file) {
+            const filename = req.file.filename;
+            const fileUrl = path.join(filename);
+            messageData.images = fileUrl;
+          }
         messageData.conversationId = req.body.conversationId
         messageData.sender = req.body.sender;
         messageData.text = req.body.text;
-        console.log("messageData baru : ", messageData)
+        
 
         const message = new Messages({
             conversationId : messageData.conversationId,
@@ -42,7 +44,7 @@ router.post("/create-new-message",upload.array("images"),catchAsyncErrors(async(
         })
     }
     catch(error){
-        
+
         return next(new ErrorHandler(error,400))
     }
 }))

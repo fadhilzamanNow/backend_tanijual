@@ -217,6 +217,61 @@ router.post("/login-shop", catchAsyncErrors(async(req,res,next) => {
     }
   }))
 
+  //ubah foto toko
+  router.put("/update-shop-avatar",isSeller, upload.single("image"),catchAsyncErrors(async(req,res,next) => {
+    try{
+      const carishop = await Shop.findById(req.seller._id);
+
+      const pathfotoshop = `uploads/${carishop.avatar}`
+
+      fs.unlinkSync(pathfotoshop)
+
+      const fileUrl = path.join(req.file.filename)
+
+      const seller = await Shop.findByIdAndUpdate(req.seller._id, {
+        avatar : fileUrl,
+      })
+
+      res.status(201).json({
+        success : true,
+        seller
+      })
+    }
+    catch(error){
+      return next(new ErrorHandler(error,400))
+    }
+  }))
+
+  //ubah informasi toko
+
+  router.put("/update-seller-info", isSeller, catchAsyncErrors(async(req,res,next) => {
+    try{
+      const {name, description, address, phoneNumber, zipCode } = req.body
+
+      const toko = await Shop.findOne(req.seller._id)
+
+      if(!toko) {
+        return next(new ErrorHandler("Toko yang pengen diupdate tidak ada", 400))
+      }
+
+      toko.name = name;
+      toko.description = description;
+      toko.address = address;
+      toko.phoneNumber = phoneNumber;
+      toko.zipCode = zipCode;
+
+      await toko.save();
+
+      res.status(201).json({
+        success : true,
+        toko
+      })
+    }
+    catch(error){
+      return next(new ErrorHandler(error,400))
+    }
+  }))
+
 
 module.exports = router;
 
