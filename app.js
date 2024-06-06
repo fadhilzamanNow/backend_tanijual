@@ -11,6 +11,10 @@ app.use(cors({
     credentials : true
 }));
 app.use("/",express.static("uploads"));
+
+/* app.use("/", (req,res) => {
+    res.send("Tes bisa masuk");
+}) */
 app.use(bodyParser.urlencoded({extended : true, limit : '50mb'}));
 app.use(bodyParser.json({limit : '50mb'}));
 
