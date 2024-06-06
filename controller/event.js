@@ -8,28 +8,54 @@ const router = express.Router();
 const Event = require("../model/event");
 const { isSeller } = require("../middleware/auth");
 const fs = require("fs")
+const cloudinary = require("cloudinary")
 
 
 // buat create event
 router.post("/create-event", upload.array("images"), catchAsyncErrors(async(req,res,next) => {
+    console.log("berhasil kesini")
     try{
+        console.log("test")
         const shopId = req.body.shopId
         const shop = await Shop.findById(shopId);
         if(!shop){
             return next(new ErrorHandler("Shop ID tidak valid", 400))
         }else{
-            const files = req.files;
-            const imageUrls = files.map((file) => `${file.filename}`);
-            const eventData = req.body;
-            eventData.images = imageUrls;
-            eventData.shop = shop; 
+            console.log("aman")
 
-            const product = await Event.create(eventData);
+            let images = [];
 
+            if (typeof req.body.images === "string") {
+              console.log("ok")
+              images.push(req.body.images);
+            } else {
+              console.log("no")
+              images = req.body.images;
+            }
+            const imagesLinks = [];
+            console.log("jumlah image :", images.length)
+    
+            for (let i = 0; i < images.length; i++) {
+              const result = await cloudinary.v2.uploader.upload(images[i], {
+                folder: "products",
+              });
+    
+              imagesLinks.push({
+                public_id: result.public_id,
+                url: result.secure_url,
+              });
+            }
+    
+            const productData = req.body;
+            productData.images = imagesLinks;
+            productData.shop = shop;
+           
+            const event = await Event.create(productData);
+    
             res.status(201).json({
-                success : true,
-                product,
-            })
+              success: true,
+              event,
+            });
         }
 
     }

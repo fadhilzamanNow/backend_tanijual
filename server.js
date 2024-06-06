@@ -1,5 +1,5 @@
 const connectDatabase = require("./db/Database");
-
+const cloudinary = require("cloudinary");
 app = require("./app");
 
 
@@ -19,6 +19,17 @@ if(process.env.NODE_ENV !== "PRODUCTION"){
 }
 // connect db
 connectDatabase();
+
+console.log("name :", process.env.CLOUDINARY_NAME)
+console.log("api key :", process.env.CLOUDINARY_API_KEY)
+console.log("api secret :", process.env.CLOUDINARY_API_SECRET)
+
+//nyimpen data pakai cloudinary
+cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET
+  })
 
 //create server 
 

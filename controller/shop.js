@@ -11,37 +11,42 @@ const {upload} = require("../multer");
 const catchAsyncErrors = require("../middleware/catchAsyncErrors");
 const ErrorHandler = require("../utils/ErrorHandler");
 const sendShopToken = require("../utils/shopToken");
+const cloudinary = require("cloudinary")
 
 
-router.post("/create-shop", upload.single("file"), async(req,res,next) => {
+router.post("/create-shop", async(req,res,next) => {
+  console.log("berhasil masuk");
     try{
-        const {email} = req.body;
+        const {
+          name,
+          email,
+          password,
+          avatar,
+          zipCode,
+          adress,
+          phoneNumber,
+        } = req.body;
         const sellerEmail = await Shop.findOne({email})
         if(sellerEmail){
-            const filename = req.file.filename;
-            const filePath = `uploads/${filename}`
-            fs.unlink(filePath, (err) => {
-                if(err){
-                    console.log(err);
-                    req.status(500).json({message : "Error deleting file"})
-                }
-            })
-            return next(new ErrorHandler("Email yang kamu masukkan sudah pernah digunakan", 400))
-            
+            return next(new ErrorHandler("Email Toko sudah pernah digunakan", 400))   
         }
 
-        const filename = req.file.filename;
-        const fileUrl = path.join(filename);
+        const myCloud = await cloudinary.v2.uploader.upload(avatar, {
+          folder : "avatars"
+        })
     
     
         const seller = {
-            name : req.body.name,
+            name : name,
             email : email,
-            password : req.body.password,
-            avatar : fileUrl,
-            address : req.body.address,
-            phoneNumber : req.body.phoneNumber,
-            zipCode : req.body.zipCode
+            password : password,
+            avatar : {
+              public_id : myCloud.public_id,
+              url : myCloud.secure_url
+            },
+            address : adress,
+            phoneNumber : phoneNumber,
+            zipCode : zipCode
         };
 
         const activationToken = createActivationToken(seller);
@@ -84,21 +89,25 @@ router.post(
 
       try {
         const { activation_token } = req.body;
+        console.log("isi :", req.body)
         const newSeller = jwt.verify(
           activation_token,
           process.env.ACTIVATION_SECRET
         );
-  
+        console.log("decrypt : ", newSeller)
         if (!newSeller) {
           return next(new ErrorHandler("Invalid token", 400));
         }
         const { name, email, password, avatar, phoneNumber, zipCode, address } = newSeller;
+        
   
         let seller = await Shop.findOne({ email });
   
         if (seller) {
-          return next(new ErrorHandler("User already exists", 400));
+          return next(new ErrorHandler("Toko sudah pernah dibuat", 400));
         }
+
+
         seller = await Shop.create({
           name,
           email,
@@ -218,24 +227,37 @@ router.post("/login-shop", catchAsyncErrors(async(req,res,next) => {
   }))
 
   //ubah foto toko
-  router.put("/update-shop-avatar",isSeller, upload.single("image"),catchAsyncErrors(async(req,res,next) => {
+  router.put("/update-shop-avatar",isSeller, catchAsyncErrors(async(req,res,next) => {
     try{
+
+      const {avatar} = req.body
       const carishop = await Shop.findById(req.seller._id);
+      console.log("ok")
+      if(avatar !== "") {
+        console.log("ok2")
+        const imageId = carishop.avatar.public_id
+        
+        await cloudinary.v2.uploader.destroy(imageId)
 
-      const pathfotoshop = `uploads/${carishop.avatar}`
+        const myCloud = await cloudinary.v2.uploader.upload(avatar, {
+          folder : "avatars"
+        })
 
-      fs.unlinkSync(pathfotoshop)
+        carishop.avatar = {
+          public_id : myCloud.public_id,
+          url : myCloud.secure_url
+        }
 
-      const fileUrl = path.join(req.file.filename)
 
-      const seller = await Shop.findByIdAndUpdate(req.seller._id, {
-        avatar : fileUrl,
-      })
+        await carishop.save()
 
-      res.status(201).json({
-        success : true,
-        seller
-      })
+        res.status(201).json({
+          success : true,
+          seller : carishop
+        })
+      }
+
+      
     }
     catch(error){
       return next(new ErrorHandler(error,400))

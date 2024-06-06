@@ -9,22 +9,52 @@ const ErrorHandler = require("../utils/ErrorHandler");
 const { upload } = require("../multer");
 const { isSeller, isAuthenticated } = require("../middleware/auth");
 const fs = require("fs")
-
+const cloudinary = require('cloudinary')
 // create Product di shop 
-router.post("/create-product", upload.array("images"), catchAsyncErrors(async(req,res,next) => {
+router.post("/create-product", catchAsyncErrors(async(req,res,next) => {
     try{
         const shopId = req.body.shopId
         const shop = await Shop.findById(shopId);
         if(!shop){
             return next(new ErrorHandler("Shop ID tidak valid", 400))
         }else{
-            const files = req.files;
+            let images = []
+
+            if(typeof req.body.images === "string"){
+                images.push(req.body.images)
+            }else{
+                images = req.body.images
+            }
+
+            const imageLinks = [];
+
+            for(let i = 0; i < images.length; i++){
+                const result = await cloudinary.v2.uploader.upload(images[i], {
+                    folder : "products"
+                })
+
+                imageLinks.push({
+                    public_id : result.public_id,
+                    url : result.secure_url
+                })
+
+
+                
+                
+            }
+
+            const productData = req.body;
+            productData.images = imageLinks;
+            productData.shop = shop
+            const product = await Product.create(productData)
+
+           /*  const files = req.files;
             const imageUrls = files.map((file) => `${file.filename}`);
             const productData = req.body;
             productData.images = imageUrls;
             productData.shop = shop; 
 
-            const product = await Product.create(productData);
+            const product = await Product.create(productData); */
 
             res.status(201).json({
                 success : true,
