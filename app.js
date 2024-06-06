@@ -26,7 +26,7 @@ app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 if(process.env.NODE_ENV !== "PRODUCTION"){
     require("dotenv").config({
-        path:"backup/config/.env"
+        path:"config/.env"
     })
 }
 
