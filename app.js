@@ -7,9 +7,10 @@ const cors = require("cors");
 
 app.use(cookieParser());
 app.use(cors({  
-    origin : "http://localhost:3000",
+    origin : ["https://frontend-tanijual.vercel.app/","https://frontend-tanijual.vercel.app/","http://localhost:3000"],
     credentials : true
 }));
+
 /* app.use("/",express.static("uploads")); */
 
 /* app.use("/", (req,res) => {
