@@ -1,4 +1,4 @@
-const express = require("express");
+/* const express = require("express");
 const catchAsyncErrors = require("../middleware/catchAsyncErrors");
 
 const router = express.Router();
@@ -27,3 +27,4 @@ router.get("/stripeapikey", catchAsyncErrors(async(req,res,next) => {
 }))
 
 module.exports = router
+ */
