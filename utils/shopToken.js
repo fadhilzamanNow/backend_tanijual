@@ -2,7 +2,7 @@ const sendShopToken = (user, statusCode, res) => {
     const token = user.getJwtToken();
 
 
-    // option untuk cookies, nambahin secure sama samesite
+    // option untuk cookies, nambahin secure sama samesites
 
     const options = {
         expires : new Date(Date.now() + 90 + 24 * 24 * 60 * 60 * 1000),

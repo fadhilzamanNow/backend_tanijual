@@ -79,6 +79,23 @@ router.get("/get-all-events/:id", catchAsyncErrors(async(req,res,next) => {
     }
 }))
 
+// get semua event dari shop tertentu
+router.get(
+    "/get-all-events/:id",
+    catchAsyncErrors(async (req, res, next) => {
+      try {
+        const events = await Event.find({ shopId: req.params.id });
+  
+        res.status(201).json({
+          success: true,
+          events,
+        });
+      } catch (error) {
+        return next(new ErrorHandler(error, 400));
+      }
+    })
+  );
+
 // delete events
 
 router.delete("/delete-shop-event/:id", isSeller, catchAsyncErrors(async(req,res,next) => {
