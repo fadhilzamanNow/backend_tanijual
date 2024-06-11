@@ -9,7 +9,7 @@ const sendMail = require("../utils/sendMail");
 const sendToken = require("../utils/jwtToken");
 const { isAuthenticated } = require("../middleware/auth");
 
-// create user
+// membuat user
 router.post("/create-user", async (req, res, next) => {
   try {
     const { name, email, password, avatar } = req.body;
@@ -35,17 +35,17 @@ router.post("/create-user", async (req, res, next) => {
 
     const activationToken = createActivationToken(user);
 
-    const activationUrl = `http://localhost:3000/activation/${activationToken}`;
+    const activationUrl = `https://frontend-tanijual.vercel.app/activation/${activationToken}`;
 
     try {
       await sendMail({
         email: user.email,
-        subject: "Activate your account",
-        message: `Hello ${user.name}, please click on the link to activate your account: ${activationUrl}`,
+        subject: "Aktivasi Akunmu",
+        message: `Halo ${user.name}, Silahkan klik link berikut untuk mengaktifkan akunmu ${activationUrl}`,
       });
       res.status(201).json({
         success: true,
-        message: `please check your email:- ${user.email} to activate your account!`,
+        message: `Moohon cek emailmu pada  ${user.email} untuk mengaktifkan akunmu`,
       });
     } catch (error) {
       return next(new ErrorHandler(error.message, 500));
@@ -55,7 +55,7 @@ router.post("/create-user", async (req, res, next) => {
   }
 });
 
-// create activation token
+// membuat aktivasi token
 const createActivationToken = (user) => {
   return jwt.sign(user, process.env.ACTIVATION_SECRET, {
     expiresIn: "5m",
