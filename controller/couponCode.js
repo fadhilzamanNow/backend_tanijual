@@ -31,10 +31,19 @@ router.post("/create-coupon-code", isSeller, catchAsyncErrors(async(req,res,next
 
 //ngetest end point
 
-router.get("/test", (req,res,next) => {
-    res.status(201).json({
-        messages : "Selamat kamu berhasil mengkases end point ini"
-    })
+router.post("/test/:name", (req,res,next) => {
+    if(req.params.name){
+        res.status(201).json({
+            messages : "Selamat kamu memasukkan nama"
+        })
+        
+    }
+    else{
+        res.status(404).json({
+            message : "Gagal"
+        })
+    }
+    
 })
 
 

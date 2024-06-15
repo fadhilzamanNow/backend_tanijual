@@ -19,6 +19,10 @@ router.post("/create-user", async (req, res, next) => {
       return next(new ErrorHandler("User already exists", 400));
     }
 
+    if(password.length < 6){
+      return next(new ErrorHandler("Passwordmu kurang dari 6 karakter", 400))
+    }
+
     const myCloud = await cloudinary.v2.uploader.upload(avatar, {
       folder: "avatars",
     });

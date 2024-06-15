@@ -153,7 +153,11 @@ router.post("/login-shop", catchAsyncErrors(async(req,res,next) => {
         const {email,password} = req.body;
 
         if(!email || !password){
-            return next(new ErrorHandler("Please provide the all fields !", 400))
+            return next(new ErrorHandler("Mohon Tuliskan Informasi Yang Dibutuhkan !", 400))
+        }
+
+        if(password.length() < 6){
+            return next(new ErrorHandler("Passwordmu kurang dari 6 karakter", 400))
         }
 
         const user = await Shop.findOne({email}).select("+password");
