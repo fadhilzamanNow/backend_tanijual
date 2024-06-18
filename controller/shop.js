@@ -26,10 +26,25 @@ router.post("/create-shop", async(req,res,next) => {
           adress,
           phoneNumber,
         } = req.body;
+
+        if(!name || !email || !password || !avatar || !zipCode || !adress | !phoneNumber){
+          return next(new ErrorHandler("Informasi yang kamu masukkan belum lengkap", 400))
+        }
+
+
+        if(!email.includes("@")){
+          return next(new ErrorHandler("Email yang kamu masukkan tidak valid", 400))
+        }
+
+        if(password.length < 6){
+          return next(new ErrorHandler("Passwordmu kurang dari 6 karakter", 400))
+        }
         const sellerEmail = await Shop.findOne({email})
         if(sellerEmail){
             return next(new ErrorHandler("Email Toko sudah pernah digunakan", 400))   
         }
+
+        
 
         const myCloud = await cloudinary.v2.uploader.upload(avatar, {
           folder : "avatars"
@@ -153,7 +168,7 @@ router.post("/login-shop", catchAsyncErrors(async(req,res,next) => {
         const {email,password} = req.body;
 
         if(!email || !password){
-            return next(new ErrorHandler("Mohon Tuliskan Informasi Yang Dibutuhkan !", 400))
+            return next(new ErrorHandler("Informasi yang dimasukkan belum lengkap !", 400))
         }
 
         if(password.length() < 6){

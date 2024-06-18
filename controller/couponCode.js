@@ -31,7 +31,7 @@ router.post("/create-coupon-code", isSeller, catchAsyncErrors(async(req,res,next
 
 //ngetest end point
 
-router.post("/test/:name", (req,res,next) => {
+router.get("/test/:name", (req,res,next) => {
     if(req.params.name){
         res.status(201).json({
             messages : "Selamat kamu memasukkan nama"

@@ -15,9 +15,18 @@ router.post("/create-user", async (req, res, next) => {
     const { name, email, password, avatar } = req.body;
     const userEmail = await User.findOne({ email });
 
-    if (userEmail) {
-      return next(new ErrorHandler("User already exists", 400));
+    if( !name || !email || !password || !avatar){
+      return next(new ErrorHandler("Data yang kamu masukkan tidak lengkap"))
     }
+    if(!email.includes("@")){
+      return next(new ErrorHandler("Email yang kamu masukkan tidak valid"))
+    }
+
+    if (userEmail) {
+      return next(new ErrorHandler("Email Sudah Pernah Digunakan", 400));
+    }
+
+    
 
     if(password.length < 6){
       return next(new ErrorHandler("Passwordmu kurang dari 6 karakter", 400))
@@ -110,7 +119,7 @@ router.post("/login-user", catchAsyncErrors(async(req,res,next) => {
       const {email,password} = req.body;
 
       if(!email || !password){
-          return next(new ErrorHandler("Please provide the all fields !", 400))
+          return next(new ErrorHandler("Informasi yang dimasukkan belum lengkap!", 400))
       }
 
       const user = await User.findOne({email}).select("+password");
