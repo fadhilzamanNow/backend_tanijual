@@ -171,7 +171,7 @@ router.post("/login-shop", catchAsyncErrors(async(req,res,next) => {
             return next(new ErrorHandler("Informasi yang dimasukkan belum lengkap !", 400))
         }
 
-        if(password.length() < 6){
+        if(password.length < 6){
             return next(new ErrorHandler("Passwordmu kurang dari 6 karakter", 400))
         }
 
