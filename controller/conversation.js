@@ -10,9 +10,9 @@ router.post("/create-new-conversation", catchAsyncErrors(async(req,res,next) => 
 
     try{
         const {groupTitle, userId, sellerId} = req.body;
-
+        console.log("group Title", groupTitle)
         const isConversationExist = await Conversation.findOne({groupTitle})
-
+        console.log("apakah ada", isConversationExist)
         if(isConversationExist){
             const conversation = isConversationExist
             res.status(201).json({
